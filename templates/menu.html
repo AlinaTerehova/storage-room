@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+
+{% block main %}
+<h1>Добро пожаловать, {{ login }}!</h1>
+<ul>
+    <li><a href="/storage">Камеры хранения</a></li>
+    <li><a href="/register">Регистрация</a></li>
+    <li><a href="/login">Авторизация</a></li>
+    <li><a href="/logout">Выход</a></li>
+</ul>
+{% endblock %}
+
