@@ -1,0 +1,20 @@
+
+body {
+    margin: 0;
+    font-family: Trebuchet MS, sans-serif;
+    background-color: #022514;
+    color: #ebebeb;
+    margin-top: 50px;
+    justify-content: center;  
+    align-items: center;  
+    text-align: center; /
+}
+
+img {
+    margin: 30px;
+    width: 50%
+}
+
+a {
+    color: white
+}

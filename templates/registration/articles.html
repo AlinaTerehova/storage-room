@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block lab %}Лабораторная работа 5{% endblock %}
+
+{% block main %}
+    <h1>Статьи</h1>
+
+    
+    {% if articles %}
+        {% for article in articles %}
+            <h2>{{ article.title }}</h2>
+            <blockquote>{{ article.article_text }}</blockquote>
+            
+            {% if article.is_favourate %}(Избранная){% endif %}
+            {% if article.is_public %}(Публичная){% endif %}
+            <p></p>
+            <form action="{{ url_for('reg.delete', article_id=article.id) }}" method="post">
+                <button type="submit">Удалить</button>
+            </form>
+            <p></p>
+            <a href="{{ url_for('reg.edit', article_id=article.id) }}">Редактировать</a>
+        {% endfor %}
+    {% else %}
+        <p>{{ message }}</p>
+    {% endif %}
+{% endblock %}
