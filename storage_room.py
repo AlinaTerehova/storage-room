@@ -36,13 +36,21 @@ def lab():
 # Получение информации о комнатах
 @room.route('/storage_room/rooms', methods=['GET'])
 def get_rooms():
+    login = session.get('login')  # Проверяем, авторизован ли пользователь
     conn, cur = db_connect()
 
     cur.execute("SELECT * FROM rooms")
     rooms = cur.fetchall()
 
+    # Если пользователь не авторизован, заменяем имена на "Зарезервировано"
+    if not login:
+        for room in rooms:
+            if room['tenant']:
+                room['tenant'] = 'Зарезервировано'
+
     db_close(conn, cur)
     return jsonify({'rooms': rooms}), 200
+
 
 # Забронирование комнаты
 @room.route('/storage_room/rooms/booking/<int:room_number>', methods=['POST'])

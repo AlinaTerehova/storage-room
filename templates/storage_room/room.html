@@ -2,125 +2,137 @@
 
 {% block script %}
 <script>
-    function getRoomList() {
-        const url = '/storage_room/rooms';  // Используем правильный путь
-        fetch(url)
+function getRoomList() {
+    const url = '/storage_room/rooms'; // Используем правильный путь
+    fetch(url)
         .then(function(response) {
             return response.json();
         })
         .then(function(data) {
             const rooms = data.rooms;
-
             // Сортируем комнаты по номеру
             rooms.sort((a, b) => a.number - b.number);
-
-            const ul = document.getElementById('room-list');
-            ul.innerHTML = '';  // Очищаем список перед повторным заполнением
-
+            const container = document.getElementById('room-grid');
+            container.innerHTML = ''; // Очищаем контейнер перед повторным заполнением
             for (let i = 0; i < rooms.length; i++) {
                 const room = rooms[i];
-                let li = document.getElementById(`room-${room.number}`);
-                
-                if (!li) {
-                    li = document.createElement('li');
-                    li.id = `room-${room.number}`;
-                    ul.appendChild(li);
-                }
-
-                li.innerHTML = `${room.number}: ${room.tenant || 'свободен'}`;
-
+                const roomDiv = document.createElement('div');
+                roomDiv.className = 'room';
+                roomDiv.innerHTML = `
+                    <div class="room-number">Комната ${room.number}</div>
+                    <div class="room-status">${room.tenant || 'Свободна'}</div>
+                `;
                 if (!room.tenant) {
                     const bookingButton = document.createElement('button');
                     bookingButton.innerText = 'Зарезервировать';
                     bookingButton.onclick = function() { booking(room.number); };
-                    li.appendChild(bookingButton);
+                    roomDiv.appendChild(bookingButton);
                 } else {
                     const releaseButton = document.createElement('button');
                     releaseButton.innerText = 'Освободить';
                     releaseButton.onclick = function() { release(room.number); };
-                    li.appendChild(releaseButton);
+                    roomDiv.appendChild(releaseButton);
                 }
+                container.appendChild(roomDiv);
             }
         });
-    }
+}
 
-    function booking(roomNumber) {
-        const url = '/storage_room/rooms/booking/' + roomNumber;
-        fetch(url, {
-            method: 'POST'
-        })
-        .then(function(response) {
-            return response.json();
-        })
+function booking(roomNumber) {
+    const url = '/storage_room/rooms/booking/' + roomNumber;
+    fetch(url, { method: 'POST' })
+        .then(function(response) { return response.json(); })
         .then(function(data) {
             if (data.error) {
-                alert(data.error);  // Показываем ошибку, если она есть
+                alert(data.error); // Показываем ошибку, если она есть
             } else {
-                getRoomList();  // Обновляем список после бронирования
+                getRoomList(); // Обновляем список после бронирования
             }
         })
         .catch(function(error) {
             console.error('Ошибка при бронировании:', error);
             alert('Ошибка: ' + (error.message || 'Неизвестная ошибка'));
         });
-    }
+}
 
-    function release(roomNumber) {
-        const url = '/storage_room/rooms/release/' + roomNumber;  // Используем правильный путь
-        fetch(url, {
-            method: 'POST'
-        })
+function release(roomNumber) {
+    const url = '/storage_room/rooms/release/' + roomNumber; // Используем правильный путь
+    fetch(url, { method: 'POST' })
         .then(function(response) {
             if (!response.ok) {
                 return response.json().then(function(data) {
-                    throw new Error(data.error || 'Не удалось освободить ячейку');
+                    throw new Error(data.error || 'Не удалось освободить комнату');
                 });
             }
             return response.json();
         })
         .then(function(data) {
-            getRoomList();  // Обновляем список после освобождения
+            getRoomList(); // Обновляем список после освобождения
         })
         .catch(function(error) {
-            alert('Ошибка: ' + (error.message || 'Неизвестная ошибка'));  // Показываем ошибку на русском
+            alert('Ошибка: ' + (error.message || 'Неизвестная ошибка')); // Показываем ошибку
         });
-    }
+}
 
-    document.addEventListener('DOMContentLoaded', function() {
-        getRoomList();  // Загружаем список комнат при загрузке страницы
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    getRoomList(); // Загружаем список комнат при загрузке страницы
+});
 </script>
 {% endblock %}
 
 {% block styles %}
 <style>
-    button {
-        margin-left: 15px;
-        padding: 8px; 
-        background-color: white; 
-        border: 2px solid rgb(1, 37, 1); 
-        color:  rgb(1, 37, 1); 
-        border-radius: 4px; 
-        cursor: pointer; 
-        transition: background-color 0.3s, color 0.3s; 
-    }
-
-    button:hover {
-        background-color: rgb(238, 135, 10); 
-    }
-
-    #room-list {
-        list-style: none;
-        padding: 0; 
-    }
-
-    #room-list li {
-        margin-bottom: 15px; 
-    }
+#room-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+    padding: 0;
+    margin: 0;
+}
+.room {
+    width: 150px;
+    height: 150px;
+    border: 2px solid rgb(1, 37, 1);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: white;
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s;
+}
+.room:hover {
+    background-color: rgb(238, 135, 10);
+    color: white;
+}
+.room-number {
+    font-weight: bold;
+    font-size: 16px;
+}
+.room-status {
+    font-size: 14px;
+    color: gray;
+}
+button {
+    padding: 8px;
+    background-color: white;
+    border: 2px solid rgb(1, 37, 1);
+    color: rgb(1, 37, 1);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+button:hover {
+    background-color: rgb(238, 135, 10);
+    color: white;
+}
 </style>
 {% endblock %}
 
 {% block main %}
-    <h1>Список кабинетов</h1>
-    <ul id="room-list"></ul>
+<h1>Список комнат</h1>
+<div id="room-grid"></div>
 {% endblock %}
