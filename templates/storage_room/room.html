@@ -3,7 +3,7 @@
 {% block script %}
 <script>
     function getRoomList() {
-        const url = '/storage_room/rooms'; // Используем правильный путь
+        const url = '/resp-api/storage_room/rooms'; // Изменен путь
         fetch(url)
             .then(function(response) {
                 return response.json();
@@ -53,10 +53,9 @@
                 }
             });
     }
-    
 
 function booking(roomNumber) {
-    const url = '/storage_room/rooms/booking/' + roomNumber;
+    const url = '/resp-api/storage_room/rooms/booking/' + roomNumber; // Изменен путь
     fetch(url, { method: 'POST' })
         .then(function(response) { return response.json(); })
         .then(function(data) {
@@ -73,7 +72,7 @@ function booking(roomNumber) {
 }
 
 function release(roomNumber) {
-    const url = '/storage_room/rooms/release/' + roomNumber; // Используем правильный путь
+    const url = '/resp-api/storage_room/rooms/release/' + roomNumber; // Изменен путь
     fetch(url, { method: 'POST' })
         .then(function(response) {
             if (!response.ok) {
