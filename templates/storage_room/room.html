@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block script %}
+<script>
+    function getRoomList() {
+        const url = '/storage_room/rooms';  // Используем правильный путь
+        fetch(url)
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            const rooms = data.rooms;
+
+            // Сортируем комнаты по номеру
+            rooms.sort((a, b) => a.number - b.number);
+
+            const ul = document.getElementById('room-list');
+            ul.innerHTML = '';  // Очищаем список перед повторным заполнением
+
+            for (let i = 0; i < rooms.length; i++) {
+                const room = rooms[i];
+                let li = document.getElementById(`room-${room.number}`);
+                
+                if (!li) {
+                    li = document.createElement('li');
+                    li.id = `room-${room.number}`;
+                    ul.appendChild(li);
+                }
+
+                li.innerHTML = `${room.number}: ${room.tenant || 'свободен'}`;
+
+                if (!room.tenant) {
+                    const bookingButton = document.createElement('button');
+                    bookingButton.innerText = 'Зарезервировать';
+                    bookingButton.onclick = function() { booking(room.number); };
+                    li.appendChild(bookingButton);
+                } else {
+                    const releaseButton = document.createElement('button');
+                    releaseButton.innerText = 'Освободить';
+                    releaseButton.onclick = function() { release(room.number); };
+                    li.appendChild(releaseButton);
+                }
+            }
+        });
+    }
+
+    function booking(roomNumber) {
+        const url = '/storage_room/rooms/booking/' + roomNumber;
+        fetch(url, {
+            method: 'POST'
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.error) {
+                alert(data.error);  // Показываем ошибку, если она есть
+            } else {
+                getRoomList();  // Обновляем список после бронирования
+            }
+        })
+        .catch(function(error) {
+            console.error('Ошибка при бронировании:', error);
+            alert('Ошибка: ' + (error.message || 'Неизвестная ошибка'));
+        });
+    }
+
+    function release(roomNumber) {
+        const url = '/storage_room/rooms/release/' + roomNumber;  // Используем правильный путь
+        fetch(url, {
+            method: 'POST'
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                return response.json().then(function(data) {
+                    throw new Error(data.error || 'Не удалось освободить ячейку');
+                });
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            getRoomList();  // Обновляем список после освобождения
+        })
+        .catch(function(error) {
+            alert('Ошибка: ' + (error.message || 'Неизвестная ошибка'));  // Показываем ошибку на русском
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        getRoomList();  // Загружаем список комнат при загрузке страницы
+    });
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+    button {
+        margin-left: 15px;
+        padding: 8px; 
+        background-color: white; 
+        border: 2px solid rgb(1, 37, 1); 
+        color:  rgb(1, 37, 1); 
+        border-radius: 4px; 
+        cursor: pointer; 
+        transition: background-color 0.3s, color 0.3s; 
+    }
+
+    button:hover {
+        background-color: rgb(238, 135, 10); 
+    }
+
+    #room-list {
+        list-style: none;
+        padding: 0; 
+    }
+
+    #room-list li {
+        margin-bottom: 15px; 
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+    <h1>Список кабинетов</h1>
+    <ul id="room-list"></ul>
+{% endblock %}

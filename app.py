@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, session
 
 from registration import reg
-from lab6 import lab6
+from storage_room import room
 
 import os
 
@@ -12,7 +12,7 @@ app.config['DB_TYPE'] = os.getenv('DB_TYPE', 'postgres')
 
 
 app.register_blueprint(reg)
-app.register_blueprint(lab6)
+app.register_blueprint(room)
 
 @app.route("/")
 def menu():
