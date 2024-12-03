@@ -2,41 +2,58 @@
 
 {% block script %}
 <script>
-function getRoomList() {
-    const url = '/storage_room/rooms'; // Используем правильный путь
-    fetch(url)
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(data) {
-            const rooms = data.rooms;
-            // Сортируем комнаты по номеру
-            rooms.sort((a, b) => a.number - b.number);
-            const container = document.getElementById('room-grid');
-            container.innerHTML = ''; // Очищаем контейнер перед повторным заполнением
-            for (let i = 0; i < rooms.length; i++) {
-                const room = rooms[i];
-                const roomDiv = document.createElement('div');
-                roomDiv.className = 'room';
-                roomDiv.innerHTML = `
-                    <div class="room-number">Комната ${room.number}</div>
-                    <div class="room-status">${room.tenant || 'Свободна'}</div>
+    function getRoomList() {
+        const url = '/storage_room/rooms'; // Используем правильный путь
+        fetch(url)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                const rooms = data.rooms;
+                const freeCount = data.free;
+                const occupiedCount = data.occupied;
+    
+                // Обновляем количество свободных и занятых комнат
+                document.getElementById('room-summary').innerHTML = `
+                    Свободных комнат: ${freeCount} <br> 
+                    Занятых комнат: ${occupiedCount}
                 `;
-                if (!room.tenant) {
-                    const bookingButton = document.createElement('button');
-                    bookingButton.innerText = 'Зарезервировать';
-                    bookingButton.onclick = function() { booking(room.number); };
-                    roomDiv.appendChild(bookingButton);
-                } else {
-                    const releaseButton = document.createElement('button');
-                    releaseButton.innerText = 'Освободить';
-                    releaseButton.onclick = function() { release(room.number); };
-                    roomDiv.appendChild(releaseButton);
+    
+                // Сортируем комнаты по номеру
+                rooms.sort((a, b) => a.number - b.number);
+                const container = document.getElementById('room-grid');
+                container.innerHTML = ''; // Очищаем контейнер перед повторным заполнением
+                for (let i = 0; i < rooms.length; i++) {
+                    const room = rooms[i];
+                    const roomDiv = document.createElement('div');
+                    roomDiv.className = 'room';
+                    if (room.tenant) {
+                        roomDiv.classList.add('occupied'); // Добавляем класс для занятых комнат
+                    }
+                    roomDiv.innerHTML = `
+                        <div class="room-number">Ячейка ${room.number}</div>
+                        <div class="room-status">${room.tenant || 'Свободна'}</div>
+                    `;
+                    if (!room.tenant) {
+                        const bookingButton = document.createElement('button');
+                        bookingButton.innerText = 'Зарезервировать';
+                        bookingButton.onclick = function() {
+                            booking(room.number);
+                        };
+                        roomDiv.appendChild(bookingButton);
+                    } else {
+                        const releaseButton = document.createElement('button');
+                        releaseButton.innerText = 'Освободить';
+                        releaseButton.onclick = function() {
+                            release(room.number);
+                        };
+                        roomDiv.appendChild(releaseButton);
+                    }
+                    container.appendChild(roomDiv);
                 }
-                container.appendChild(roomDiv);
-            }
-        });
-}
+            });
+    }
+    
 
 function booking(roomNumber) {
     const url = '/storage_room/rooms/booking/' + roomNumber;
@@ -82,57 +99,71 @@ document.addEventListener('DOMContentLoaded', function() {
 
 {% block styles %}
 <style>
-#room-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: flex-start;
-    padding: 0;
-    margin: 0;
-}
-.room {
-    width: 150px;
-    height: 150px;
-    border: 2px solid rgb(1, 37, 1);
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: white;
-    text-align: center;
-    transition: background-color 0.3s, color 0.3s;
-}
-.room:hover {
-    background-color: rgb(238, 135, 10);
-    color: white;
-}
-.room-number {
-    font-weight: bold;
-    font-size: 16px;
-}
-.room-status {
-    font-size: 14px;
-    color: gray;
-}
-button {
-    padding: 8px;
-    background-color: white;
-    border: 2px solid rgb(1, 37, 1);
-    color: rgb(1, 37, 1);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-}
-button:hover {
-    background-color: rgb(238, 135, 10);
-    color: white;
-}
+    #room-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center; /* Центровка по горизонтали */
+        align-items: center; /* Центровка по вертикали */
+        min-height: 100vh; /* Устанавливаем минимальную высоту для вертикальной центровки */
+        margin: 0;
+    }
+
+    #room-summary {
+        margin-bottom: 15px;
+    }
+        
+    .room {
+        width: 140px;
+        height: 140px;
+        border: 2px solid rgb(1, 37, 1);
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background-color: white;
+        text-align: center;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    .room:hover {
+        background-color: rgb(120, 162, 111);
+        color: white;
+    }
+    .room-number {
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .room-status {
+        font-size: 14px;
+        color: rgb(57, 142, 40);
+    }
+    button {
+        padding: 8px;
+        background-color: white;
+        border: 2px solid rgb(1, 37, 1);
+        color: rgb(1, 37, 1);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+
+    .room.occupied {
+        background-color: #003c18; /* Цвет для занятых комнат */
+        color: #ffffff; /* Цвет текста для занятых комнат */
+    }
+
+    h1 {
+        text-align: center;
+    }
+
 </style>
 {% endblock %}
 
 {% block main %}
-<h1>Список комнат</h1>
+<h1>Ячейки</h1>
+<div id="room-summary"></div>
 <div id="room-grid"></div>
 {% endblock %}

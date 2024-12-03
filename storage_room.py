@@ -38,18 +38,25 @@ def lab():
 def get_rooms():
     login = session.get('login')  # Проверяем, авторизован ли пользователь
     conn, cur = db_connect()
-
+    
+    # Получаем список всех комнат
     cur.execute("SELECT * FROM rooms")
     rooms = cur.fetchall()
-
+    
+    # Подсчитываем свободные и занятые комнаты
+    total_rooms = len(rooms)
+    occupied_rooms = sum(1 for room in rooms if room['tenant'])
+    free_rooms = total_rooms - occupied_rooms
+    
     # Если пользователь не авторизован, заменяем имена на "Зарезервировано"
     if not login:
         for room in rooms:
             if room['tenant']:
-                room['tenant'] = 'Зарезервировано'
-
+                room['tenant'] = 'Зарезервирована'
+    
     db_close(conn, cur)
-    return jsonify({'rooms': rooms}), 200
+    return jsonify({'rooms': rooms, 'free': free_rooms, 'occupied': occupied_rooms}), 200
+
 
 
 # Забронирование комнаты
@@ -57,7 +64,7 @@ def get_rooms():
 def booking(room_number):
     login = session.get('login')
     if not login:
-        return jsonify({'error': 'Не авторизован'}), 401  # Ошибка: Не авторизован
+        return jsonify({'error': 'Пожалуйста, авторизуйтесь'}), 401  # Ошибка: Не авторизован
 
     conn, cur = db_connect()
 
@@ -109,7 +116,7 @@ def cancellation(room_number):
 def release(room_number):
     login = session.get('login')
     if not login:
-        return jsonify({'error': 'Не авторизован'}), 401  # Ошибка: Не авторизован
+        return jsonify({'error': 'Пожалуйста, авторизуйтесь'}), 401  # Ошибка: Не авторизован
 
     conn, cur = db_connect()
 

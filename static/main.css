@@ -1,21 +1,21 @@
-
+/* Основные стили для страницы */
 body {
     margin: 0;
     font-family: Trebuchet MS, sans-serif;
     background-color: #ffffff;
     color: #482e1d;
-    padding-bottom: 60px; 
+    padding-bottom: 60px;
 }
-    
+
 main {
     margin-bottom: 60px;
     padding: 10px;
     margin: 20px;
 }
 
-header{
+header {
     padding: 10px;
-    background:#273219;
+    background: #273219;
     color: #ffffff;
 }
 
@@ -31,48 +31,109 @@ footer {
     right: 0;
 }
 
+/* Стили для ссылок */
 a:link {
     color: rgb(3, 64, 21);
-    text-decoration: none; 
+    text-decoration: none;
 }
+
 a:hover {
     color: rgb(26, 227, 26);
-    text-decoration: none; 
+    text-decoration: none;
 }
+
 a:active {
-    color: rgb(12, 179, 98); 
+    color: rgb(12, 179, 98);
     text-decoration: none;
 }
+
 a:visited {
-    color: rgb(45, 122, 72); 
+    color: rgb(45, 122, 72);
     text-decoration: none;
 }
 
-div {
-    margin: 10px
+/* Формы и кнопки */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
 }
 
+label {
+    margin-bottom: 5px;
+}
+
+input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#register-form, #login-form {
+    max-width: 300px;
+   
+}
+
+button {
+    margin-top: 15px;
+    padding: 10px;
+    font-size: 16px;
+    background-color: rgb(254, 254, 254);
+    color: rgb(19, 1, 1);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    
+}
+
+button:hover {
+    background-color: rgb(255, 156, 69);
+}
+
+/* Центрирование элементов */
+.center-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Стиль для ошибок */
 .error {
-    color:red;
+    color: red;
     font-weight: bold;
 }
 
-
+/* Стили для блоков */
 .block {
     display: inline-block;
-    padding:  15px;
+    padding: 15px;
     margin: 5px;
     background-color: #003c18;
     border-radius: 5px;
     text-align: center;
+    transition: background-color 0.3s ease; /* Плавное изменение цвета */
 }
 
 a.block {
     color: white;
+    text-decoration: none; /* Убираем подчеркивание */
 }
 
-.block-container{
-    background-color: #05b13e;
+/* Изменение цвета при наведении */
+.block:hover {
+    background-color:  rgb(255, 156, 69); /* Новый цвет при наведении */
+}
+
+/* Контейнер блоков */
+.block-container {
     padding: 30px;
     text-align: center;
+}
+
+/* Стили для кнопки в контейнере */
+.button-container {
+    display: flex;
+    justify-content: center;
 }
