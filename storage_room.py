@@ -37,21 +37,17 @@ def lab():
 @room.route('/resp-api/storage_room/rooms', methods=['GET'])
 def get_rooms():
     login = session.get('login')  # Проверяем, авторизован ли пользователь
-    conn, cur = db_connect()
-
-    # Получаем список всех комнат
-    if current_app.config['DB_TYPE'] == 'postgres':
-        cur.execute("SELECT * FROM rooms")
-    else:
-        cur.execute("SELECT * FROM rooms")
+    conn, cur = db_connect()  # Подключаемся к базе данных
     
-    rooms = cur.fetchall()
+    # Получаем список всех комнат
+    cur.execute("SELECT * FROM rooms")
+    rooms = [dict(row) for row in cur.fetchall()]  # Преобразуем строки в словари
     
     # Подсчитываем свободные и занятые комнаты
     total_rooms = len(rooms)
     occupied_rooms = sum(1 for room in rooms if room['tenant'])
     free_rooms = total_rooms - occupied_rooms
-    
+
     # Если пользователь не авторизован, заменяем имена на "Зарезервировано"
     if not login:
         for room in rooms:
