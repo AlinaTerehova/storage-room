@@ -91,7 +91,7 @@ def booking(room_number):
 
     if count >= 5:
         db_close(conn, cur)
-        return jsonify({'error': 'Вы не можете забронировать больше 5 комнат'}), 403  # Превышение лимита бронирований
+        return jsonify({'error': 'Вы не можете забронировать больше 5 ячеек'}), 403  # Превышение лимита бронирований
 
     # Проверяем, занята ли комната
     if current_app.config['DB_TYPE'] == 'postgres':
