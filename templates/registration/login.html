@@ -10,6 +10,7 @@
         {% if error %}
             <p class="error">{{ error }}</p>
         {% endif %}
+        <div> Нет аккаунта?  <a href="{{ url_for('reg.register') }}" style="color:rgb(2, 57, 8)">Зарегистрируйтесь!</a> </div>
         <form action="/registration/login" method="post" id="login-form">
             <div class="form-group">
                 <label for="login">Логин:</label>
