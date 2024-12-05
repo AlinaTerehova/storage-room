@@ -2,24 +2,25 @@
 
 {% block script %}
 <script>
+    // Функция для получения списка комнат
     function getRoomList() {
-        const url = '/resp-api/storage_room/rooms'; // Изменен путь
+        const url = '/resp-api/storage_room/rooms'; // API для получения данных о комнатах
         fetch(url)
             .then(function(response) {
                 return response.json();
             })
             .then(function(data) {
-                const rooms = data.rooms;
-                const freeCount = data.free;
-                const occupiedCount = data.occupied;
-    
-                // Обновляем количество свободных и занятых комнат
+                const rooms = data.rooms; // Список комнат
+                const freeCount = data.free; // Количество свободных комнат
+                const occupiedCount = data.occupied; // Количество занятых комнат
+
+                // Обновляем сводную информацию о комнатах
                 document.getElementById('room-summary').innerHTML = `
                     Свободных комнат: ${freeCount} <br> 
                     Занятых комнат: ${occupiedCount}
                 `;
-    
-                // Сортируем комнаты по номеру
+
+                // Сортируем комнаты по номеру и отображаем их
                 rooms.sort((a, b) => a.number - b.number);
                 const container = document.getElementById('room-grid');
                 container.innerHTML = ''; // Очищаем контейнер перед повторным заполнением
@@ -28,7 +29,7 @@
                     const roomDiv = document.createElement('div');
                     roomDiv.className = 'room';
                     if (room.tenant) {
-                        roomDiv.classList.add('occupied'); // Добавляем класс для занятых комнат
+                        roomDiv.classList.add('occupied'); // Добавляем стиль для занятых комнат
                     }
                     roomDiv.innerHTML = `
                         <div class="room-number">Ячейка ${room.number}</div>
@@ -38,14 +39,14 @@
                         const bookingButton = document.createElement('button');
                         bookingButton.innerText = 'Зарезервировать';
                         bookingButton.onclick = function() {
-                            booking(room.number);
+                            booking(room.number); // Бронирование комнаты
                         };
                         roomDiv.appendChild(bookingButton);
                     } else {
                         const releaseButton = document.createElement('button');
                         releaseButton.innerText = 'Освободить';
                         releaseButton.onclick = function() {
-                            release(room.number);
+                            release(room.number); // Освобождение комнаты
                         };
                         roomDiv.appendChild(releaseButton);
                     }
@@ -54,50 +55,54 @@
             });
     }
 
-function booking(roomNumber) {
-    const url = '/resp-api/storage_room/rooms/booking/' + roomNumber; // Изменен путь
-    fetch(url, { method: 'POST' })
-        .then(function(response) { return response.json(); })
-        .then(function(data) {
-            if (data.error) {
-                alert(data.error); // Показываем ошибку, если она есть
-            } else {
-                getRoomList(); // Обновляем список после бронирования
-            }
-        })
-        .catch(function(error) {
-            console.error('Ошибка при бронировании:', error);
-            alert('Ошибка: ' + (error.message || 'Неизвестная ошибка'));
-        });
-}
+    // Функция для бронирования комнаты
+    function booking(roomNumber) {
+        const url = '/resp-api/storage_room/rooms/booking/' + roomNumber; // API для бронирования комнаты
+        fetch(url, { method: 'POST' })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.error) {
+                    alert(data.error); // Выводим ошибку, если она есть
+                } else {
+                    getRoomList(); // Обновляем список комнат после успешного бронирования
+                }
+            })
+            .catch(function(error) {
+                console.error('Ошибка при бронировании:', error);
+                alert('Ошибка: ' + (error.message || 'Неизвестная ошибка'));
+            });
+    }
 
-function release(roomNumber) {
-    const url = '/resp-api/storage_room/rooms/release/' + roomNumber; // Изменен путь
-    fetch(url, { method: 'POST' })
-        .then(function(response) {
-            if (!response.ok) {
-                return response.json().then(function(data) {
-                    throw new Error(data.error || 'Не удалось освободить комнату');
-                });
-            }
-            return response.json();
-        })
-        .then(function(data) {
-            getRoomList(); // Обновляем список после освобождения
-        })
-        .catch(function(error) {
-            alert('Ошибка: ' + (error.message || 'Неизвестная ошибка')); // Показываем ошибку
-        });
-}
+    // Функция для освобождения комнаты
+    function release(roomNumber) {
+        const url = '/resp-api/storage_room/rooms/release/' + roomNumber; // API для освобождения комнаты
+        fetch(url, { method: 'POST' })
+            .then(function(response) {
+                if (!response.ok) {
+                    return response.json().then(function(data) {
+                        throw new Error(data.error || 'Не удалось освободить комнату');
+                    });
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                getRoomList(); // Обновляем список комнат после успешного освобождения
+            })
+            .catch(function(error) {
+                alert('Ошибка: ' + (error.message || 'Неизвестная ошибка')); // Выводим ошибку
+            });
+    }
 
-document.addEventListener('DOMContentLoaded', function() {
-    getRoomList(); // Загружаем список комнат при загрузке страницы
-});
+    // Загружаем список комнат при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        getRoomList();
+    });
 </script>
 {% endblock %}
 
 {% block styles %}
 <style>
+    /* Стили для сетки комнат */
     #room-grid {
         display: flex;
         flex-wrap: wrap;
@@ -108,10 +113,13 @@ document.addEventListener('DOMContentLoaded', function() {
         margin: 0;
     }
 
+
+    /* Сводная информация о комнатах */
     #room-summary {
         margin-bottom: 15px;
     }
-        
+
+    /* Стили для карточки комнаты */
     .room {
         width: 140px;
         height: 140px;
@@ -126,10 +134,19 @@ document.addEventListener('DOMContentLoaded', function() {
         text-align: center;
         transition: background-color 0.3s, color 0.3s;
     }
+
+    /* Стили для занятых комнат */
+    .room.occupied {
+        background-color: #003c18;
+        color: #ffffff;
+    }
+
     .room:hover {
         background-color: rgb(120, 162, 111);
         color: white;
     }
+
+    /* Стили для текста внутри карточки */
     .room-number {
         font-weight: bold;
         font-size: 16px;
@@ -138,6 +155,8 @@ document.addEventListener('DOMContentLoaded', function() {
         font-size: 14px;
         color: rgb(57, 142, 40);
     }
+
+    /* Стили для кнопок */
     button {
         padding: 8px;
         background-color: white;
@@ -148,16 +167,10 @@ document.addEventListener('DOMContentLoaded', function() {
         transition: background-color 0.3s, color 0.3s;
     }
 
-
-    .room.occupied {
-        background-color: #003c18; /* Цвет для занятых комнат */
-        color: #ffffff; /* Цвет текста для занятых комнат */
-    }
-
+    /* Стиль заголовка */
     h1 {
         text-align: center;
     }
-
 </style>
 {% endblock %}
 
@@ -166,3 +179,4 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="room-summary"></div>
 <div id="room-grid"></div>
 {% endblock %}
+

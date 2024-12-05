@@ -33,22 +33,22 @@ footer {
 
 /* Стили для ссылок */
 a:link {
-    color: rgb(3, 64, 21);
+    color: rgb(242, 255, 5);
     text-decoration: none;
 }
 
 a:hover {
-    color: rgb(26, 227, 26);
+    color: rgb(227, 220, 26);
     text-decoration: none;
 }
 
 a:active {
-    color: rgb(12, 179, 98);
+    color: rgb(245, 249, 6);
     text-decoration: none;
 }
 
 a:visited {
-    color: rgb(45, 122, 72);
+    color: rgb(255, 198, 11);
     text-decoration: none;
 }
 
@@ -113,17 +113,18 @@ button:hover {
     background-color: #003c18;
     border-radius: 5px;
     text-align: center;
-    transition: background-color 0.3s ease; /* Плавное изменение цвета */
+    transition: background-color 0.3s ease;
 }
 
 a.block {
     color: white;
-    text-decoration: none; /* Убираем подчеркивание */
+    text-decoration: none; 
 }
 
 /* Изменение цвета при наведении */
 .block:hover {
-    background-color:  rgb(255, 156, 69); /* Новый цвет при наведении */
+    background-color:  rgb(255, 156, 69); 
+    color:rgb(10, 32, 1)
 }
 
 /* Контейнер блоков */

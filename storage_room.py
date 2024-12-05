@@ -4,8 +4,10 @@ from psycopg2.extras import RealDictCursor
 from os import path
 import sqlite3
 
+# Создаем Blueprint для маршрутов, связанных с комнатами
 room = Blueprint('room', __name__)
 
+# Функция для подключения к базе данных
 def db_connect():
     if current_app.config['DB_TYPE'] == 'postgres':
         conn = psycopg2.connect(
@@ -24,18 +26,26 @@ def db_connect():
 
     return conn, cur
 
+# Функция для закрытия соединения с базой данных
 def db_close(conn, cur):
+
     conn.commit()
     cur.close()
     conn.close()
 
+# Маршрут для отображения страницы комнаты
 @room.route('/storage_room/')
 def lab():
+
     return render_template('storage_room/room.html')
 
 # Получение информации о комнатах
 @room.route('/resp-api/storage_room/rooms', methods=['GET'])
 def get_rooms():
+    """
+    Возвращает список всех комнат с информацией о количестве свободных и занятых комнат.
+    Если пользователь не авторизован, информация о занятых комнатах скрывается.
+    """
     login = session.get('login')  # Проверяем, авторизован ли пользователь
     conn, cur = db_connect()  # Подключаемся к базе данных
     
@@ -60,9 +70,14 @@ def get_rooms():
 # Забронирование комнаты
 @room.route('/resp-api/storage_room/rooms/booking/<int:room_number>', methods=['POST'])
 def booking(room_number):
+    """
+    Обрабатывает запрос на бронирование комнаты.
+    Пользователь может забронировать до 5 комнат.
+    Возвращает статус операции.
+    """
     login = session.get('login')
     if not login:
-        return jsonify({'error': 'Пожалуйста, авторизуйтесь'}), 401  
+        return jsonify({'error': 'Пожалуйста, авторизуйтесь'}), 401  # Пользователь не авторизован
 
     conn, cur = db_connect()
 
@@ -76,7 +91,7 @@ def booking(room_number):
 
     if count >= 5:
         db_close(conn, cur)
-        return jsonify({'error': 'Вы не можете забронировать больше 5 комнат'}), 403 
+        return jsonify({'error': 'Вы не можете забронировать больше 5 комнат'}), 403  # Превышение лимита бронирований
 
     # Проверяем, занята ли комната
     if current_app.config['DB_TYPE'] == 'postgres':
@@ -88,7 +103,7 @@ def booking(room_number):
 
     if room and room['tenant']:
         db_close(conn, cur)
-        return jsonify({'error': 'Комната уже забронирована'}), 400  
+        return jsonify({'error': 'Комната уже забронирована'}), 400  # Комната занята
 
     # Бронируем комнату
     if current_app.config['DB_TYPE'] == 'postgres':
@@ -97,14 +112,18 @@ def booking(room_number):
         cur.execute("UPDATE rooms SET tenant = ? WHERE number = ?", (login, room_number))
 
     db_close(conn, cur)
-    return jsonify({'result': 'Успешно забронировано'}), 200 
+    return jsonify({'result': 'Успешно забронировано'}), 200  # Успешное бронирование
 
 # Отмена бронирования
 @room.route('/resp-api/storage_room/cancellation/<int:room_number>', methods=['POST'])
 def cancellation(room_number):
+    """
+    Обрабатывает запрос на отмену бронирования комнаты.
+    Только пользователь, забронировавший комнату, может отменить бронирование.
+    """
     login = session.get('login')
     if not login:
-        return jsonify({'error': 'Не авторизован'}), 401  
+        return jsonify({'error': 'Не авторизован'}), 401  # Пользователь не авторизован
 
     conn, cur = db_connect()
 
@@ -118,7 +137,7 @@ def cancellation(room_number):
 
     if room and room['tenant'] != login:
         db_close(conn, cur)
-        return jsonify({'error': 'Вы не можете снять чужую бронь'}), 403 
+        return jsonify({'error': 'Вы не можете снять чужую бронь'}), 403  # Нельзя отменить чужую бронь
 
     # Отменяем бронирование
     if current_app.config['DB_TYPE'] == 'postgres':
@@ -132,9 +151,13 @@ def cancellation(room_number):
 # Освобождение комнаты
 @room.route('/resp-api/storage_room/rooms/release/<int:room_number>', methods=['POST'])
 def release(room_number):
+    """
+    Обрабатывает запрос на освобождение комнаты.
+    Только пользователь, забронировавший комнату, может её освободить.
+    """
     login = session.get('login')
     if not login:
-        return jsonify({'error': 'Пожалуйста, авторизуйтесь'}), 401 
+        return jsonify({'error': 'Пожалуйста, авторизуйтесь'}), 401  # Пользователь не авторизован
 
     conn, cur = db_connect()
 
@@ -148,7 +171,7 @@ def release(room_number):
 
     if room and room['tenant'] != login:
         db_close(conn, cur)
-        return jsonify({'error': 'Вы не можете снять чужую бронь'}), 403  
+        return jsonify({'error': 'Вы не можете снять чужую бронь'}), 403  # Нельзя освободить чужую бронь
 
     # Освобождаем комнату
     if current_app.config['DB_TYPE'] == 'postgres':

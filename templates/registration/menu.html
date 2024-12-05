@@ -1,17 +1,21 @@
 {% extends 'base.html' %}
 
 {% block main %}
-    <h2 style="text-align: center;"> Добро пожаловать, {{ login if login else 'Пользователь' }}! </h2>
+    <h2 style="text-align: center;"> Добро пожаловать, {{ session.get('login', 'Пользователь') }}! </h2>
     <div class="block-container">
         <div>
             <a href="{{ url_for('room.lab') }}" class="block">Комната хранения</a>
         </div>
         <div>
-            <a href="{{ url_for('reg.login') }}" class="block">Вход</a>
-            <a href="{{ url_for('reg.register') }}" class="block">Регистрация</a>
-            <a href="{{ url_for('reg.logout') }}" class="block">Выход</a> 
+            {% if session.get('login') %}
+                <a href="{{ url_for('reg.logout') }}" class="block">Выход</a>
+                <form action="{{ url_for('reg.delete_account') }}" method="post" style="display: inline;">
+                    <button type="submit" class="block" style="background: rgb(238, 88, 88); color: white;">Удалить аккаунт</button>
+                </form>
+            {% else %}
+                <a href="{{ url_for('reg.login') }}" class="block">Вход</a>
+                <a href="{{ url_for('reg.register') }}" class="block">Регистрация</a>
+            {% endif %}
         </div>
     </div>
-
-  
 {% endblock %}
